@@ -1,0 +1,286 @@
+label_names:
+  carla:
+    0: unlabeled
+    1: building
+    2: fence
+    3: other
+    4: pedestrian
+    5: pole
+    6: road_line
+    7: road
+    8: sidewalk
+    9: vegetation
+    10: car
+    11: wall
+    12: traffic_sign
+    13: rider
+    14: two-wheeler
+    15: terrain
+  nuscenes:
+    0: noise
+    1: animal
+    2: human.pedestrian.adult
+    3: human.pedestrian.child
+    4: human.pedestrian.construction_worker
+    5: human.pedestrian.personal_mobility
+    6: human.pedestrian.police_officer
+    7: human.pedestrian.stroller
+    8: human.pedestrian.wheelchair
+    9: movable_object.barrier
+    10: movable_object.debris
+    11: movable_object.pushable_pullable
+    12: movable_object.trafficcone
+    13: static_object.bicycle_rack
+    14: vehicle.bicycle
+    15: vehicle.bus.bendy
+    16: vehicle.bus.rigid
+    17: vehicle.car
+    18: vehicle.construction
+    19: vehicle.emergency.ambulance
+    20: vehicle.emergency.police
+    21: vehicle.motorcycle
+    22: vehicle.trailer
+    23: vehicle.truck
+    24: flat.driveable_surface
+    25: flat.other
+    26: flat.sidewalk
+    27: flat.terrain
+    28: static.manmade
+    29: static.other
+    30: static.vegetation
+    31: vehicle.ego
+
+label_aggregation:
+  nuscenes2static_dynamic_ground:
+    ignore:
+    - noise
+    - vehicle.ego
+    static:
+    - static.manmade
+    - static_object.bicycle_rack
+    - static.other
+    - static.vegetation
+    dynamic:
+    - vehicle.car
+    - animal
+    - human.pedestrian.adult
+    - human.pedestrian.child
+    - human.pedestrian.construction_worker
+    - human.pedestrian.personal_mobility
+    - human.pedestrian.police_officer
+    - human.pedestrian.stroller
+    - human.pedestrian.wheelchair
+    - movable_object.barrier
+    - movable_object.debris
+    - movable_object.pushable_pullable
+    - movable_object.trafficcone
+    - vehicle.bicycle
+    - vehicle.bus.bendy
+    - vehicle.bus.rigid
+    - vehicle.construction
+    - vehicle.emergency.ambulance
+    - vehicle.emergency.police
+    - vehicle.motorcycle
+    - vehicle.trailer
+    - vehicle.truck
+    ground:
+    - flat.driveable_surface
+    - flat.other
+    - flat.sidewalk
+    - flat.terrain
+  nuscenes2carla:
+    ignore: []
+    unlabeled:
+    - noise
+    - vehicle.ego
+    building:
+    - static.manmade
+    # fence: []
+    other:
+    - animal
+    - movable_object.barrier
+    - movable_object.debris
+    - movable_object.pushable_pullable
+    - movable_object.trafficcone
+    - static_object.bicycle_rack
+    - flat.other
+    - static.other
+    pedestrian:
+    - human.pedestrian.adult
+    - human.pedestrian.child
+    - human.pedestrian.construction_worker
+    - human.pedestrian.personal_mobility
+    - human.pedestrian.police_officer
+    - human.pedestrian.stroller
+    - human.pedestrian.wheelchair
+    # pole: []
+    # road_line: []
+    road:
+    - flat.driveable_surface
+    sidewalk:
+    - flat.sidewalk
+    vegetation:
+    - static.vegetation
+    car:
+    - vehicle.bus.bendy
+    - vehicle.bus.rigid
+    - vehicle.car
+    - vehicle.construction
+    - vehicle.emergency.ambulance
+    - vehicle.emergency.police
+    - vehicle.trailer
+    - vehicle.truck
+    # wall: []
+    # traffic_sign: []
+    # rider: []
+    two-wheeler:
+    - vehicle.bicycle
+    - vehicle.motorcycle
+    terrain:
+    - flat.terrain
+  static_dynamic_ground:
+    ignore:
+    - unlabeled
+    static:
+    - building
+    - other
+    - pole
+    - traffic_sign
+    - wall
+    - fence
+    - vegetation
+    dynamic:
+    - car
+    - pedestrian
+    - rider
+    - two-wheeler
+    ground:
+    - road
+    - terrain
+    - road_line
+    - sidewalk
+
+label_colors:
+  nuscenes_static_dynamic_ground:
+    noise: !tuple # white
+     - 255
+     - 255
+     - 255
+     - 255
+    static.manmade: !tuple # green
+     - 0
+     - 255
+     - 0
+     - 255
+    vehicle.car: !tuple # red
+     - 255
+     - 0
+     - 0
+     - 255
+    flat.driveable_surface: !tuple # blue
+     - 0
+     - 0
+     - 255
+     - 255
+  static_dynamic_ground:
+    unlabeled: !tuple # white
+     - 255
+     - 255
+     - 255
+     - 255
+    building: !tuple # green
+     - 0
+     - 255
+     - 0
+     - 255
+    car: !tuple # red
+     - 255
+     - 0
+     - 0
+     - 255
+    road: !tuple # blue
+     - 0
+     - 0
+     - 255
+     - 255
+  carla:
+    0: !tuple
+    - 0
+    - 0
+    - 0
+    - 255
+    1: !tuple
+    - 70
+    - 70
+    - 70
+    - 255
+    2: !tuple
+    - 190
+    - 153
+    - 153
+    - 255
+    3: !tuple
+    - 250
+    - 170
+    - 160
+    - 255
+    4: !tuple
+    - 220
+    - 20
+    - 60
+    - 255
+    5: !tuple
+    - 153
+    - 153
+    - 153
+    - 255
+    6: !tuple
+    - 157
+    - 234
+    - 50
+    - 255
+    7: !tuple
+    - 128
+    - 64
+    - 128
+    - 255
+    8: !tuple
+    - 224
+    - 35
+    - 232
+    - 255
+    9: !tuple
+    - 107
+    - 142
+    - 35
+    - 255
+    10: !tuple
+    - 0
+    - 0
+    - 142
+    - 255
+    11: !tuple
+    - 102
+    - 102
+    - 156
+    - 255
+    12: !tuple
+    - 220
+    - 220
+    - 0
+    - 255
+    13: !tuple
+    - 255
+    - 0
+    - 0
+    - 255
+    14: !tuple
+    - 119
+    - 11
+    - 32
+    - 255
+    15: !tuple
+    - 152
+    - 251
+    - 152
+    - 255

@@ -1,0 +1,3 @@
+[submodule "unsup_flow/tf_user_ops/3rd_party/nanoflann"]
+path = unsup_flow/tf_user_ops/3rd_party/nanoflann
+url = https://github.com/jlblancoc/nanoflann.git

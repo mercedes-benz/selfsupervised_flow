@@ -1,0 +1,449 @@
+default:
+  optimizer: "rmsprop"
+  batch_size: 1
+  random_seed: 3141
+  data:
+    name: kitti_lidar_raw
+    train:
+      num_moving_points: 5581904675
+      num_still_points: null
+    bev_extent: !tuple
+    - -35.0
+    - -35.0
+    - 35.0
+    - 35.0
+    nbr_samples:
+      train: -1
+      valid: -1
+      kitti: -1
+      kitti_lidar_raw: -1
+    non_rigid_flow_threshold: 0.05
+    params:
+      nuscenes: null
+    ground_filtering:
+      base_data:
+        method: cone
+        cone_angle__deg: 0.8
+        cone_z_threshold__m: -1.70
+      kitti:
+        method: cone
+        cone_angle__deg: 0.0
+        cone_z_threshold__m: -1.43
+    stereo_fov_filtering: null
+    num_input_points: 0
+    nn_filter_for_metrics:
+      nbr_points: 8192
+      center: !tuple
+      - 0.0
+      - 0.0
+      - 0.0
+  iterations:
+    pretrain: 0
+    train: 1_000_000
+    train_metrics_every: 1
+    eval_every: 1000
+    full_eval_every: 2_500
+  layers:
+    convolution:
+      type: normal
+    batch_normalization:
+      renorm: True
+    activation:
+    - relu
+  learning_rate:
+    initial: 0.0001
+    step_decay:
+      decay_ratio: 0.5
+      step_length: 60000
+    warm_up:
+      initial: 0.01
+      step_length: 2000
+  losses:
+    unsupervised:
+      dynamicness:
+        static_with_high_dyn_penalty__perc: 60.0
+        penalty_upper_perc: 0.0
+        penalty_lower_perc: 0.0
+      fw_bw_static_trafo_penalty_factor: 1.0
+      knn_loss_penalty_factor: 1.0
+      artificial_labels:
+        use_static_aggr_flow: True
+        cross_entropy_penalty: 0.0
+        weight_mode: constant
+        discrepancy_threshold: 0.05
+        mixture_distance: 0.05
+        gauss_widths: null
+        knn_mode: point
+      knn_on_dynamic_penalty: 0.0
+      knn_on_static_penalty: 0.0
+      knn_dist_measure: point
+      knn_loss:
+        L1_delta: 0.0
+        drop_outliers__perc: 0.0
+        fov_mode: mask_close_fov
+      occlusion_penalty_factor: 0.0
+      opposite_flow_penalty_factor: 0.0
+      static_flow_penalty_factor: 1.0
+      temporal_cls_consistency_penalty_factor: 0.0
+      smoothness_penalty_factor:
+        static: 0.0
+        dynamic: 0.0
+        aggregated: 0.0
+      use_epsilon_for_weighted_pc_alignment: False
+      num_neighbors_smoothness_penalty: 5
+  model:
+    name: "raft"
+    feature_downsampling_factor: 8
+    learn_upsampling: False
+    num_iters: 6
+    num_pred_iters: 6 # prior to the addidtion of training flag this never had any effect and was always equal to num_iters
+    dropout_rate: 0
+    flow_maps_archi: "single"
+    corr_cfg:
+      module: all # or "kernel"
+      search_radius: 3
+      num_levels: 4
+    u_net: # we dont use unet, but we need this final_scale parameter in the unet config for HEAD Decoder
+      final_scale: 1
+    output_modification:
+      disappearing_logit: off
+      static_logit: net
+      dynamic_logit: net
+      ground_logit: off
+      dynamic_flow: net
+      static_flow: net
+      dynamic_flow_grad_scale: 1.0
+    predict_weight_for_static_aggregation: off
+    use_static_aggr_flow_for_aggr_flow: False
+    use_dynamic_aggr_flow_for_aggr_flow: False
+    dynamic_flow_is_non_rigid_flow: False
+    head:
+      activation:
+      - leaky_relu
+      - 0.1
+      filters: 128
+      nbr_layers: 3
+    point_pillars:
+      inf_distance: 1000.0
+      max_points_per_pillar: 32
+      nbr_point_feats: 64
+      nbr_pillars: !tuple
+      - 640
+      - 640
+      point_feat_mask: !tuple
+      - True
+      - True
+      - True
+      - False
+      - True
+      - True
+      - True
+      - False
+      - True
+      - True
+      - False
+      voxel_feat_mask: !tuple
+      - False
+      - False
+      - False
+      - False
+      - False
+      - False
+      - False
+      - False
+      - False
+      - False
+      - False
+  phases:
+    train:
+      dataset: train
+      mode: unsupervised
+
+sota_us:
+  losses:
+    unsupervised:
+      artificial_labels:
+        cross_entropy_penalty: 0.1
+      knn_on_dynamic_penalty: 1.0
+      knn_on_static_penalty: 1.0
+      smoothness_penalty_factor:
+        dynamic: 1.0
+
+sota_net:
+  model:
+    predict_weight_for_static_aggregation: sigmoid
+    use_static_aggr_flow_for_aggr_flow: True
+
+no_static_aggr:
+  model:
+    use_static_aggr_flow_for_aggr_flow: False
+
+no_stataggr_weight:
+  model:
+    predict_weight_for_static_aggregation: off
+
+stereo_fov_filtering:
+  data:
+    stereo_fov_filtering:
+      min_opening_angle__deg: -41.95
+      max_opening_angle__deg: 40.16
+
+finetune_stereo:
+  phases:
+    pretrain:
+      dataset: train
+      mode: unsupervised
+    train:
+      dataset: train_kitti_stereo_sf
+  iterations:
+    pretrain: 30_000
+    train: 10_000
+
+nuscenes:
+  meta_cfgs:
+  - low_res_loss_cfg
+  data:
+    name: nuscenes
+    train:
+      num_moving_points: 27524042
+      num_still_points: 512818554
+    params:
+      nuscenes:
+        add_nn_segmentation_for_t1: False
+        add_nn_flow_for_t1: False
+    ground_filtering:
+      base_data:
+        method: cone
+        cone_angle__deg: 0.0
+        cone_z_threshold__m: -1.43
+
+low_res_loss_cfg:
+  losses:
+    unsupervised:
+      knn_loss:
+        drop_outliers__perc: 5.0
+
+supervised_total_flow:
+  phases:
+    train:
+      mode: supervised
+  model:
+    output_modification:
+      meta_cfgs:
+      - set_cls_output_all_static
+  losses:
+    supervised:
+      use_aggregated_static_flow_instead_of_static_flow: False
+      mode: total_flow
+      L1_delta: 0.0
+
+supervised_norig_and_ego:
+  phases:
+    train:
+      mode: supervised
+  model:
+    dynamic_flow_is_non_rigid_flow: True
+    output_modification:
+      meta_cfgs:
+      - set_cls_output_all_dynamic
+  losses:
+    supervised:
+      use_aggregated_static_flow_instead_of_static_flow: False
+      mode: norig_and_ego
+      ego_L1_delta: 0.0
+      norig_L1_delta: 0.0
+      weights:
+        ego: 1.0
+        norig: 1.0
+
+supervised_dyn_and_stat_with_cls:
+  phases:
+    train:
+      mode: supervised
+  losses:
+    supervised:
+      use_aggregated_static_flow_instead_of_static_flow: True
+      cls_by_current_error: True
+      mode: dyn_and_stat_with_cls
+      dyn_threshold: 0.03
+      static_L1_delta: 0.0
+      dynamic_L1_delta: 0.0
+      weights:
+        cls: 1.0
+        static: 20.0
+        dynamic: 10.0
+
+supervised_norig_and_ego_with_cls:
+  phases:
+    train:
+      mode: supervised
+  model:
+    dynamic_flow_is_non_rigid_flow: True
+  losses:
+    supervised:
+      use_aggregated_static_flow_instead_of_static_flow: False
+      mode: norig_and_ego_with_cls
+      dyn_threshold: 0.03
+      ego_L1_delta: 0.0
+      norig_L1_delta: 0.0
+      weights:
+        cls: 1.0
+        ego: 20.0
+        norig: 10.0
+
+set_cls_output_all_static:
+  static_logit: on
+  dynamic_logit: off
+  ground_logit: off
+  dynamic_flow: zero
+
+set_cls_output_all_dynamic:
+  static_logit: off
+  dynamic_logit: on
+  ground_logit: off
+  static_flow: zero
+
+set_cls_output_by_gt_labels:
+  model:
+    output_modification:
+      static_logit: gt_label_based
+      dynamic_logit: gt_label_based
+      ground_logit: gt_label_based
+
+set_flow_output_to_gt:
+  model:
+    output_modification:
+      static_flow: gt
+      dynamic_flow: gt
+
+set_output_to_gt_by_labels:
+  model:
+    output_modification:
+      disappearing_logit: off
+      static_logit: gt_label_based
+      dynamic_logit: gt_label_based
+      ground_logit: gt_label_based
+      dynamic_flow: gt
+      static_flow: gt
+
+set_output_to_gt_by_labels_no_ground:
+  meta_cfgs:
+  - set_output_to_gt_by_labels
+  model:
+    output_modification:
+      ground_logit: off
+
+set_output_to_zero:
+  disappearing_logit: off
+  static_logit: on
+  dynamic_logit: off
+  ground_logit: off
+  static_flow: zero
+  dynamic_flow: zero
+
+set_cls_output_by_gt_flow:
+  model:
+    output_modification:
+      static_logit: gt_flow_based
+      dynamic_logit: gt_flow_based
+      ground_logit: off
+
+model_just_flow:
+  model:
+    output_modification:
+      meta_cfgs:
+      - set_cls_output_all_static
+
+predict_zero:
+  model:
+    output_modification:
+      meta_cfgs:
+      - set_output_to_zero
+
+dynamicness_penalty:
+  losses:
+    unsupervised:
+      dynamicness:
+        penalty_upper_perc: 0.001
+
+
+simple_knn_training:
+  model:
+    output_modification:
+      meta_cfgs:
+      - set_cls_output_all_static
+  losses:
+    unsupervised:
+      occlusion_penalty_factor: 0.0
+      opposite_flow_penalty_factor: 0.0
+      fw_bw_static_trafo_penalty_factor: 0.0
+      static_flow_penalty_factor: 0.0
+      knn_loss_penalty_factor: 1.0
+
+
+artificial_labels:
+  losses:
+    unsupervised:
+      artificial_labels:
+        cross_entropy_penalty: 0.001
+
+smooth_artificial_labels:
+  meta_cfgs:
+  - artificial_labels
+  losses:
+    unsupervised:
+      artificial_labels:
+        weight_mode: gaussian
+        gauss_widths:
+          static: 0.05
+          dynamic: 0.15
+
+only_knn_loss:
+  losses:
+    unsupervised:
+      occlusion_penalty_factor: 0.0
+      opposite_flow_penalty_factor: 0.0
+      fw_bw_static_trafo_penalty_factor: 0.0
+      static_flow_penalty_factor: 0.0
+
+test_knn_loss_w_smoothness:
+  model:
+    output_modification:
+      meta_cfgs:
+      - set_cls_output_all_dynamic
+  losses:
+    unsupervised:
+      fw_bw_static_trafo_penalty_factor: 0.0
+      occlusion_penalty_factor: 0.00
+      static_flow_penalty_factor: 0.0
+      smoothness_penalty_factor:
+        aggregated: 1.0
+
+
+minimal:
+  batch_size: 1
+  data:
+    nbr_samples:
+      valid: 33
+      kitti: 33
+      kitti_lidar_raw: 33
+  iterations:
+    train: 10
+    eval_every: 2
+    full_eval_every: 5
+
+no_augmentation: {}
+
+vanilla_raft:
+  model:
+    flow_maps_archi: "vanilla"
+    output_modification:
+      meta_cfgs:
+      - set_cls_output_all_static
+
+small_raft_test:
+  model:
+    point_pillars:
+        nbr_pillars: !tuple
+        - 320 # changed from default
+        - 320 # changed from default
