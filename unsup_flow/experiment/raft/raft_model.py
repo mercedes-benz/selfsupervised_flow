@@ -24,12 +24,16 @@ class OurPillarModel(tf.keras.Model):  # type:ignore
         super().__init__(*args, autocast=False, **kwargs)
         self.cfg = cfg
 
+        used_modes = {p.mode for p in self.cfg.phases.values()}
+        assert used_modes.issubset({"supervised", "unsupervised"})
+
         self.head_decoder_fw = HeadDecoder(self.cfg, name="head_decoder_forward")
         self.head_decoder_bw = HeadDecoder(self.cfg, name="head_decoder_backward")
         num_still_points = self.cfg.data.train.num_still_points
         if num_still_points is not None:
             num_still_points *= self.cfg.model.num_iters
         self.moving_dynamicness_threshold = MovingAverageThreshold(
+            unsupervised="unsupervised" in used_modes,
             num_train_samples=self.cfg.data.nbr_samples.kitti_lidar_raw
             if self.cfg.data.name == "kitti_lidar_raw"
             else self.cfg.data.nbr_samples.train,
@@ -44,8 +48,6 @@ class OurPillarModel(tf.keras.Model):  # type:ignore
         self.loss_layers = {}
         self.label_dict = label_dict
         loss_cfg = self.cfg.losses
-        used_modes = {p.mode for p in self.cfg.phases.values()}
-        assert used_modes.issubset({"supervised", "unsupervised"})
         if "supervised" in used_modes:
             assert self.cfg.model.dynamic_flow_is_non_rigid_flow == (
                 "norig_and_ego" in loss_cfg.supervised.mode
