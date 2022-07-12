@@ -708,17 +708,8 @@ class UnsupervisedLoss(tf.keras.layers.Layer):
 
                 epes_stat_flow = []
                 epes_dyn_flow = []
-                if moving_dynamicness_threshold.num_still is not None:
-                    moving_mask = []
-                else:
-                    moving_mask = None
                 dynamicness_scores = []
-                for flowdir, flow_key_gt in [
-                    ("fw", "flow_gt_t0_t1"),
-                    ("bw", "flow_gt_t1_t0"),
-                ]:
-                    if moving_mask is not None and flow_key_gt not in el:
-                        continue
+                for flowdir in ["fw", "bw"]:
                     epes_stat_flow.append(
                         tf.boolean_mask(
                             knn_results[static_key]["%s_knn" % flowdir]["nearest_dist"],
@@ -731,12 +722,6 @@ class UnsupervisedLoss(tf.keras.layers.Layer):
                             masks[flowdir],
                         )
                     )
-                    if moving_mask is not None:
-                        moving_mask.append(
-                            tf.boolean_mask(
-                                el[flow_key_gt]["moving_mask"], masks[flowdir]
-                            )
-                        )
                     dynamicness_scores.append(
                         tf.boolean_mask(
                             predictions[flowdir]["dynamicness"], masks[flowdir]
@@ -746,9 +731,7 @@ class UnsupervisedLoss(tf.keras.layers.Layer):
                 moving_dynamicness_threshold.update(
                     epes_stat_flow=tf.concat(epes_stat_flow, axis=0),
                     epes_dyn_flow=tf.concat(epes_dyn_flow, axis=0),
-                    moving_mask=None
-                    if moving_mask is None
-                    else tf.concat(moving_mask, axis=0),
+                    moving_mask=None,
                     dynamicness_scores=tf.concat(dynamicness_scores, axis=0),
                     summaries=summaries,
                     training=training,
