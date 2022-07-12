@@ -11,6 +11,7 @@ import tensorflow as tf
 class MovingAverageThreshold(tf.keras.Model):
     def __init__(
         self,
+        unsupervised: bool,
         num_train_samples,
         num_moving,
         num_still=None,
@@ -24,6 +25,10 @@ class MovingAverageThreshold(tf.keras.Model):
         self.value_range = (value_range[0], value_range[1] - value_range[0])
         self.resolution = resolution
         self.num_moving = num_moving
+        assert unsupervised == (num_still is None), (
+            "training unsupervised requires num_still to be set to None, "
+            "supervised requires num_still to be set"
+        )
         self.num_still = num_still
         self.start_value = tf.constant(start_value, dtype=tf.float32)
         self.total = num_moving
@@ -178,7 +183,12 @@ if __name__ == "__main__":
     dynamicness = tf.constant([0.1, 0.2, 0.4, 0.5, 0.6, 0.8])
     epes_stat_flow = tf.constant([0.3, 0.3, 0.3, 0.3, 0.3, 0.3])
     epes_dyn_flow = tf.constant([0.6, 0.4, 0.0, 0.8, 0.4, 0.0])
-    threshold_layer = MovingAverageThreshold(2, 6091776000 // 3, 6091776000 * 2 // 3)
+    threshold_layer = MovingAverageThreshold(
+        unsupervised=True,
+        num_train_samples=2,
+        num_moving=6091776000 // 3,
+        num_still=6091776000 * 2 // 3,
+    )
     # threshold_layer = MovingAverageThreshold(4, 8)
     for _i in range(10):
         print(threshold_layer.value())
