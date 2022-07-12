@@ -160,6 +160,9 @@ default:
       mode: unsupervised
 
 sota_us:
+  data:
+    train:
+      num_still_points: null
   losses:
     unsupervised:
       artificial_labels:
