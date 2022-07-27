@@ -13,8 +13,9 @@ import png
 import pykitti
 from joblib import Parallel, delayed
 from tqdm import tqdm
-
-from .weighted_pc_alignment import weighted_pc_alignment_wrapper_homog_trafo
+from unsup_flow.datasets.kitti_sf.weighted_pc_alignment import (
+    weighted_pc_alignment_wrapper_homog_trafo,
+)
 
 __alpha_t_deg = np.deg2rad(0.8)
 
@@ -455,18 +456,16 @@ def main():
         target_folder=args.target_dir,
     )
 
-    success_stats = Parallel(n_jobs=1 if args.debug_plot else 12)(
+    success_stats = Parallel(n_jobs=12)(
         delayed(save_flow)(data_element)
         for data_element in tqdm(flow_id_to_raw_mapping)
     )
 
-    success = map(list, zip(*success_stats))
-
-    success_mask = np.array(success)
+    success_mask = np.array(success_stats)
 
     print(
         "Wrote {0} files to {1}!".format(
-            np.count_nonzero(success_mask), args.target_folder
+            np.count_nonzero(success_mask), args.target_dir
         )
     )
     return 0
