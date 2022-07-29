@@ -555,7 +555,7 @@ def nusc_add_nn_segmentation_flow_for_t1(sample, add_semseg=False, add_flow=Fals
     if "semantics_t1" in sample.keys() and "flow_gt_t1_t0" in sample.keys():
         return sample
 
-    from unsup_flow.knn.knn_wrapper import (  # if you are using this from PointPWC, please install unsup_flow repo!
+    from unsup_flow.knn.knn_wrapper import (
         get_idx_dists_for_knn,
     )
 
@@ -988,7 +988,7 @@ def get_unsupervised_flow_dataset(
     batch_size = cfg.batch_size
 
     if data_source == "nuscenes":
-        assert cfg.data.params.carla is None, cfg.data.params
+        assert not hasattr(cfg.data.params, "carla")
         ds, filenames = get_nuscenes_flow_dataset(
             split=["train", "valid"][valid],
             keep_plain=keep_plain,

@@ -409,7 +409,7 @@ def main():
         default=os.path.join(
             os.getenv("INPUT_DATADIR", "INPUT_DATADIR_ENV_NOT_DEFINED"),
             "prepped_datasets",
-            "kitti_stereo_sf_dataset",
+            "kitti_stereo_sf",
         ),
         help="place where converted data will be dumped",
     )
