@@ -45,16 +45,16 @@ def bilinear_img_sampling(img, coords):
     upper_row = tf.clip_by_value(upper_row, 0, num_img_rows - 1)
 
     lower_left_val = tf.gather_nd(
-        img, tf.stack([left_col, lower_row], axis=-1), batch_dims=1
+        img, tf.stack([lower_row, left_col], axis=-1), batch_dims=1
     )
     upper_left_val = tf.gather_nd(
-        img, tf.stack([left_col, upper_row], axis=-1), batch_dims=1
+        img, tf.stack([upper_row, left_col], axis=-1), batch_dims=1
     )
     lower_right_val = tf.gather_nd(
-        img, tf.stack([right_col, lower_row], axis=-1), batch_dims=1
+        img, tf.stack([lower_row, right_col], axis=-1), batch_dims=1
     )
     upper_right_val = tf.gather_nd(
-        img, tf.stack([right_col, upper_row], axis=-1), batch_dims=1
+        img, tf.stack([upper_row, right_col], axis=-1), batch_dims=1
     )
 
     col_interpol = tf.cast(right_col, tf.float32) - target_col_idx_f32
