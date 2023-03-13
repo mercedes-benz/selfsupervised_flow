@@ -2,7 +2,7 @@ wheel==0.33.6
 joblib
 pptk
 scipy==1.4.1
-numpy==1.18.5
+numpy==1.22.0
 numba
 pyyaml
 tensorflow-gpu==2.3
