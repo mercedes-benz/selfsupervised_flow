@@ -43,3 +43,10 @@ setup(
     version="0.1.0",
     zip_safe=False,
 )
+a = Python 3
+b = Python 3.5
+c = Python 3.6
+d = Python 3.7
+e = Python 3.8
+f = Python
+print (Using the following versions of "f", "a", "b", "c", "d" and "e"
