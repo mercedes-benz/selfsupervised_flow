@@ -112,7 +112,7 @@ def write_tfrecord(
         if key in dimension_dict:
             fixed_dims = dimension_dict[key]
             assert isinstance(
-                fixed_dims, tuple
+                fixed_dims, (tuple, list)
             ), "You did not provide valid fixed dims for %s: %s" % (
                 key,
                 str(fixed_dims),
